@@ -1,0 +1,6 @@
+#! /usr/bin/python
+
+from d302_scanner.main import Main
+
+if __name__ == '__main__':
+    Main()
