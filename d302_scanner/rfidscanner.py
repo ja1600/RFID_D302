@@ -3,7 +3,8 @@ import os
 import sys
 import serial
 import time
-import applescript
+
+from keyboard import KeyboardWriter
 
 class RfidScanner:
 
@@ -21,14 +22,21 @@ class RfidScanner:
         'initiate_connection': '\x02\x01\x00\x00\x03\x03',
         'read_card': '\x02\x01\xa4\x0b\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xac\x03',
         }
-        ser = serial.Serial(reader_loc,4800,timeout=1)
+        try:
+            ser = serial.Serial(reader_loc,4800,timeout=1)
+        except:
+            print "Failed to locate scanner"
+            sys.exit(1)
         ser.write(prot['initiate_connection'])
         resp =  ser.read(6)
         if resp == prot['initiate_connection']:
             print "Connection established"
             time.sleep(1)
+            # Initialise keyboard
+            self.kb = KeyboardWriter()
         else:
             print "Failed to establish connection to scanner"
+            sys.exit(1)
 
     def readCardLoop(self):
         ''' Read cards forever! '''
@@ -40,7 +48,8 @@ class RfidScanner:
                 time.sleep(0.5)
             else:
                 tmp = resp[4:9].encode('hex')
-                print int("".join(tmp), 16)
+                #print int("".join(tmp), 16)
+                self.kb.write(str(int("".join(tmp), 16)))
                 time.sleep(2)
 
     def readSingleCard(self):
